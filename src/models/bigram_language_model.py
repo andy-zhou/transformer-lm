@@ -64,8 +64,9 @@ def eval_bigram_model(
     model: BigramLanguageModel,
     data: torch.Tensor,
     batch_size=32,
+    block_size=8,
 ) -> torch.Tensor:
-    Xb, Yb = make_examples(data, batch_size)
+    Xb, Yb = make_examples(data, batch_size=batch_size, block_size=block_size)
     _, loss = model(Xb, targets=Yb)
     return loss.mean()
 
@@ -75,6 +76,7 @@ def train_bigram_model(
     validation_set: torch.Tensor,
     encoder: Encoder,
     batch_size=32,
+    block_size=8,
     num_iters: int = 10000,
     log_every_n: int = 2000,
     eval_batches=6400,
@@ -91,7 +93,9 @@ def train_bigram_model(
             val_loss = eval_bigram_model(model, validation_set, eval_batches).item()
             print(f"Iteration {i:>6d}/{num_iters}: {train_loss=:.4f}, {val_loss=:.4f}")
 
-        Xb, Yb = make_examples(training_set, batch_size=batch_size)
+        Xb, Yb = make_examples(
+            training_set, batch_size=batch_size, block_size=block_size
+        )
         Xb = Xb.to(device)
         Yb = Yb.to(device)
         loss: torch.Tensor
